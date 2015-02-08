@@ -89,7 +89,17 @@ typedef struct {
   // Used by the bresenham line algorithm
   uint32_t counter_x,        // Counter variables for the bresenham line tracer
            counter_y, 
-           counter_z;
+           counter_z
+#ifdef A_AXIS
+          , counter_a
+#endif
+#ifdef B_AXIS
+          , counter_b
+#endif
+#ifdef C_AXIS
+          , counter_c
+#endif
+          ;
   #ifdef STEP_PULSE_DELAY
     uint8_t step_bits;  // Stores out_bits output to complete the step pulse delay
   #endif
@@ -337,6 +347,15 @@ ISR(TIMER1_COMPA_vect)
         st.counter_x = (st.exec_block->step_event_count >> 1);
         st.counter_y = st.counter_x;
         st.counter_z = st.counter_x;        
+#ifdef A_AXIS
+        st.counter_a = st.counter_x;
+#endif
+#ifdef B_AXIS
+        st.counter_b = st.counter_x;
+#endif
+#ifdef C_AXIS
+        st.counter_c = st.counter_x;
+#endif
       }
 
       st.dir_outbits = st.exec_block->direction_bits ^ dir_port_invert_mask; 
@@ -346,6 +365,15 @@ ISR(TIMER1_COMPA_vect)
         st.steps[X_AXIS] = st.exec_block->steps[X_AXIS] >> st.exec_segment->amass_level;
         st.steps[Y_AXIS] = st.exec_block->steps[Y_AXIS] >> st.exec_segment->amass_level;
         st.steps[Z_AXIS] = st.exec_block->steps[Z_AXIS] >> st.exec_segment->amass_level;
+#ifdef A_AXIS
+        st.steps[A_AXIS] = st.exec_block->steps[A_AXIS] >> st.exec_segment->amass_level;
+#endif
+#ifdef B_AXIS
+        st.steps[B_AXIS] = st.exec_block->steps[B_AXIS] >> st.exec_segment->amass_level;
+#endif
+#ifdef C_AXIS
+        st.steps[C_AXIS] = st.exec_block->steps[C_AXIS] >> st.exec_segment->amass_level;
+#endif
       #endif
       
     } else {
@@ -397,6 +425,45 @@ ISR(TIMER1_COMPA_vect)
     if (st.exec_block->direction_bits & (1<<Z_DIRECTION_BIT)) { sys.position[Z_AXIS]--; }
     else { sys.position[Z_AXIS]++; }
   }  
+#ifdef A_AXIS
+  #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
+    st.counter_a += st.steps[A_AXIS];
+  #else
+    st.counter_a += st.exec_block->steps[A_AXIS];
+  #endif  
+  if (st.counter_a > st.exec_block->step_event_count) {
+    st.step_outbits |= (1<<A_STEP_BIT);
+    st.counter_a -= st.exec_block->step_event_count;
+    if (st.exec_block->direction_bits & (1<<A_DIRECTION_BIT)) { sys.position[A_AXIS]--; }
+    else { sys.position[A_AXIS]++; }
+  }
+#endif
+#ifdef B_AXIS
+  #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
+    st.counter_b += st.steps[B_AXIS];
+  #else
+    st.counter_b += st.exec_block->steps[B_AXIS];
+  #endif  
+  if (st.counter_b > st.exec_block->step_event_count) {
+    st.step_outbits |= (1<<B_STEP_BIT);
+    st.counter_b -= st.exec_block->step_event_count;
+    if (st.exec_block->direction_bits & (1<<B_DIRECTION_BIT)) { sys.position[B_AXIS]--; }
+    else { sys.position[B_AXIS]++; }
+  }
+#endif
+#ifdef C_AXIS
+  #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
+    st.counter_c += st.steps[C_AXIS];
+  #else
+    st.counter_c += st.exec_block->steps[C_AXIS];
+  #endif  
+  if (st.counter_c > st.exec_block->step_event_count) {
+    st.step_outbits |= (1<<C_STEP_BIT);
+    st.counter_c -= st.exec_block->step_event_count;
+    if (st.exec_block->direction_bits & (1<<C_DIRECTION_BIT)) { sys.position[C_AXIS]--; }
+    else { sys.position[C_AXIS]++; }
+  }
+#endif
 
   // During a homing cycle, lock out and prevent desired axes from moving.
   if (sys.state == STATE_HOMING) { st.step_outbits &= sys.homing_axis_lock; }   
@@ -558,6 +625,15 @@ void st_prep_buffer()
           st_prep_block->steps[X_AXIS] = pl_block->steps[X_AXIS];
           st_prep_block->steps[Y_AXIS] = pl_block->steps[Y_AXIS];
           st_prep_block->steps[Z_AXIS] = pl_block->steps[Z_AXIS];
+#ifdef A_AXIS
+          st_prep_block->steps[A_AXIS] = pl_block->steps[A_AXIS];
+#endif
+#ifdef B_AXIS
+          st_prep_block->steps[B_AXIS] = pl_block->steps[B_AXIS];
+#endif
+#ifdef C_AXIS
+          st_prep_block->steps[C_AXIS] = pl_block->steps[C_AXIS];
+#endif
           st_prep_block->step_event_count = pl_block->step_event_count;
         #else
           // With AMASS enabled, simply bit-shift multiply all Bresenham data by the max AMASS 
@@ -566,6 +642,15 @@ void st_prep_buffer()
           st_prep_block->steps[X_AXIS] = pl_block->steps[X_AXIS] << MAX_AMASS_LEVEL;
           st_prep_block->steps[Y_AXIS] = pl_block->steps[Y_AXIS] << MAX_AMASS_LEVEL;
           st_prep_block->steps[Z_AXIS] = pl_block->steps[Z_AXIS] << MAX_AMASS_LEVEL;
+#ifdef A_AXIS
+          st_prep_block->steps[A_AXIS] = pl_block->steps[A_AXIS] << MAX_AMASS_LEVEL;
+#endif
+#ifdef B_AXIS
+          st_prep_block->steps[B_AXIS] = pl_block->steps[B_AXIS] << MAX_AMASS_LEVEL;
+#endif
+#ifdef C_AXIS
+          st_prep_block->steps[C_AXIS] = pl_block->steps[C_AXIS] << MAX_AMASS_LEVEL;
+#endif
           st_prep_block->step_event_count = pl_block->step_event_count << MAX_AMASS_LEVEL;
         #endif
         

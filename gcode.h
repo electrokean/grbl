@@ -134,6 +134,9 @@
 #define WORD_Y  11
 #define WORD_Z  12
 
+#define WORD_A  13
+#define WORD_B  14
+#define WORD_C  15
 
 
 
@@ -162,7 +165,7 @@ typedef struct {
   float r;         // Arc radius
   float s;         // Spindle speed
   uint8_t t;       // Tool selection
-  float xyz[3];    // X,Y,Z Translational axes
+  float xyz[N_AXIS];    // X,Y,Z Translational axes
 } gc_values_t;
 
 

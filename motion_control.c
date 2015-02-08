@@ -267,6 +267,9 @@ void mc_homing_cycle()
   #ifdef HOMING_CYCLE_2
     limits_go_home(HOMING_CYCLE_2);  // Homing cycle 2
   #endif
+  #ifdef HOMING_CYCLE_3
+    limits_go_home(HOMING_CYCLE_3);  // Homing cycle 3
+  #endif
     
   protocol_execute_realtime(); // Check for reset and set system abort.
   if (sys.abort) { return; } // Did not complete. Alarm state set by mc_alarm.

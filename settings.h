@@ -28,7 +28,7 @@
 #define settings_h
 
 
-#define GRBL_VERSION "0.9h"
+#define GRBL_VERSION "0.9h 6-AXIS"
 #define GRBL_VERSION_BUILD "20150204"
 
 // Version of the EEPROM data. Will be used to migrate existing data from older versions of Grbl

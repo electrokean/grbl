@@ -43,7 +43,7 @@
 
 // Default cpu mappings. Grbl officially supports the Arduino Uno only. Other processor types
 // may exist from user-supplied templates or directly user-defined in cpu_map.h
-#define CPU_MAP_ATMEGA328P // Arduino Uno CPU
+#define CPU_MAP_ATMEGA2560 // Arduino Uno CPU
 
 // Define realtime command special characters. These characters are 'picked-off' directly from the
 // serial read data stream and are not passed to the grbl line execution parser. Select characters
@@ -77,8 +77,13 @@
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
 #define HOMING_CYCLE_0 (1<<Z_AXIS)                // REQUIRED: First move Z to clear workspace.
-#define HOMING_CYCLE_1 ((1<<X_AXIS)|(1<<Y_AXIS))  // OPTIONAL: Then move X,Y at the same time.
+//#define HOMING_CYCLE_1 ((1<<X_AXIS)|(1<<Y_AXIS))  // OPTIONAL: Then move X,Y at the same time.
 // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
+#define HOMING_CYCLE_1 (1<<Y_AXIS)                // OPTIONAL: Then move Y
+#define HOMING_CYCLE_2 (1<<X_AXIS)                // OPTIONAL: Finally move X
+//#define HOMING_CYCLE_1 (1<<B_AXIS)                // OPTIONAL: Then move B (head)
+//#define HOMING_CYCLE_2 (1<<Y_AXIS)                // OPTIONAL: Then move Y
+//#define HOMING_CYCLE_3 (1<<X_AXIS)                // OPTIONAL: Finally move X
 
 // Number of homing cycles performed after when the machine initially jogs to limit switches.
 // This help in preventing overshoot and should improve repeatability. This value should be one or 
@@ -88,7 +93,7 @@
 // After homing, Grbl will set by default the entire machine space into negative space, as is typical
 // for professional CNC machines, regardless of where the limit switches are located. Uncomment this 
 // define to force Grbl to always set the machine origin at the homed location despite switch orientation.
-// #define HOMING_FORCE_SET_ORIGIN // Uncomment to enable.
+#define HOMING_FORCE_SET_ORIGIN // Uncomment to enable.
 
 // Number of blocks Grbl executes upon startup. These blocks are stored in EEPROM, where the size
 // and addresses are defined in settings.h. With the current settings, up to 2 startup blocks may
@@ -176,7 +181,7 @@
 // Sets the maximum step rate allowed to be written as a Grbl setting. This value is strictly limited
 // by the CPU speed and will change if something other than an AVR running at 16MHz is used.
 // NOTE: For now disabled, will enable if flash space permits.
-// #define MAX_STEP_RATE_HZ 30000 // Hz
+#define MAX_STEP_RATE_HZ 30000 // Hz
 
 // By default, Grbl sets all input pins to normal-high operation with their internal pull-up resistors
 // enabled. This simplifies the wiring for users by requiring only a switch connected to ground, 

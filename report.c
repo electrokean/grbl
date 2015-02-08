@@ -75,8 +75,10 @@ void report_status_message(uint8_t status_code)
       printPgmString(PSTR("Homing not enabled")); break;
       case STATUS_OVERFLOW:
       printPgmString(PSTR("Line overflow")); break; 
-      // case STATUS_MAX_STEP_RATE_EXCEEDED: 
-      // printPgmString(PSTR("Step rate > 30kHz")); break;
+#ifdef MAX_STEP_RATE_HZ
+      case STATUS_MAX_STEP_RATE_EXCEEDED: 
+      printPgmString(PSTR("Step rate > 30kHz")); break;
+#endif
       
       // Common g-code parser errors.
       case STATUS_GCODE_MODAL_GROUP_VIOLATION:
@@ -211,13 +213,36 @@ void report_grbl_settings() {
         case X_AXIS: printPgmString(PSTR("x")); break;
         case Y_AXIS: printPgmString(PSTR("y")); break;
         case Z_AXIS: printPgmString(PSTR("z")); break;
+#ifdef A_AXIS
+        case A_AXIS: printPgmString(PSTR("a")); break;
+#endif
+#ifdef B_AXIS
+        case B_AXIS: printPgmString(PSTR("b")); break;
+#endif
+#ifdef C_AXIS
+        case C_AXIS: printPgmString(PSTR("c")); break;
+#endif
       }
+#ifdef A_AXIS
+      if (idx >= A_AXIS ) {
       switch (set_idx) {
+			case 0: printPgmString(PSTR(", step/deg")); break;
+			case 1: printPgmString(PSTR(" max rate, deg/min")); break;
+			case 2: printPgmString(PSTR(" accel, deg/sec^2")); break;
+			case 3: printPgmString(PSTR(" max travel, deg")); break;
+		  }   
+      } else {
+#endif
+		  switch (set_idx) {
         case 0: printPgmString(PSTR(", step/mm")); break;
         case 1: printPgmString(PSTR(" max rate, mm/min")); break;
         case 2: printPgmString(PSTR(" accel, mm/sec^2")); break;
         case 3: printPgmString(PSTR(" max travel, mm")); break;
       }      
+#ifdef A_AXIS
+      }
+#endif
+      
       printPgmString(PSTR(")\r\n"));
     }
     val += AXIS_SETTINGS_INCREMENT;
