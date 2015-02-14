@@ -309,6 +309,8 @@ void limits_soft_check(float *target)
   uint8_t idx;
   uint8_t soft_limit_error = false;
   for (idx=0; idx<N_AXIS; idx++) {
+    // allow disabling soft limit per axis by setting max travel to zero
+    if (settings.max_travel[idx]) {   
    
     #ifdef HOMING_FORCE_SET_ORIGIN
       // When homing forced set origin is enabled, soft limits checks need to account for directionality.
@@ -322,6 +324,7 @@ void limits_soft_check(float *target)
       // NOTE: max_travel is stored as negative
       if (target[idx] > 0 || target[idx] < settings.max_travel[idx]) { soft_limit_error = true; }
     #endif
+    }
     
     if (soft_limit_error) {
       // Force feed hold if cycle is active. All buffered blocks are guaranteed to be within 
