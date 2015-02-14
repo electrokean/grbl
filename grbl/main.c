@@ -24,19 +24,7 @@
     Copyright (c) 2011-2012 Sungeun K. Jeon
 */  
 
-#include "system.h"
-#include "serial.h"
-#include "settings.h"
-#include "protocol.h"
-#include "gcode.h"
-#include "planner.h"
-#include "stepper.h"
-#include "spindle_control.h"
-#include "coolant_control.h"
-#include "motion_control.h"
-#include "limits.h"
-#include "probe.h"
-#include "report.h"
+#include "grbl.h"
 
 
 // Declare system global variable structure
@@ -91,8 +79,7 @@ int main(void)
     sys.abort = false;
     sys.rt_exec_state = 0;
     sys.rt_exec_alarm = 0;
-    if (bit_istrue(settings.flags,BITFLAG_AUTO_START)) { sys.auto_start = true; }
-    else { sys.auto_start = false; }
+    sys.suspend = false;
           
     // Start Grbl main loop. Processes program inputs and executes them.
     protocol_main_loop();

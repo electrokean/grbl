@@ -18,9 +18,7 @@
   along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
   
-#include "system.h"
-#include "settings.h"
-#include "probe.h"
+#include "grbl.h"
 
 // Inverts the probe pin state depending on user settings and probing cycle mode.
 uint8_t probe_invert_mask;
@@ -63,7 +61,7 @@ void probe_state_monitor()
     if (probe_get_state()) {
       sys.probe_state = PROBE_OFF;
       memcpy(sys.probe_position, sys.position, sizeof(float)*N_AXIS);
-      bit_true(sys.rt_exec_state, EXEC_FEED_HOLD);
+      bit_true(sys.rt_exec_state, EXEC_MOTION_CANCEL);
     }
   }
 }

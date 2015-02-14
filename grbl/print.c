@@ -24,9 +24,7 @@
     Copyright (c) 2011-2012 Sungeun K. Jeon
 */ 
 
-#include "system.h"
-#include "serial.h"
-#include "settings.h"
+#include "grbl.h"
 
 
 void printString(const char *s)
@@ -102,7 +100,7 @@ void print_uint8_base10(uint8_t n)
 }
 
 
-void print_uint32_base10(unsigned long n)
+void print_uint32_base10(uint32_t n)
 { 
   if (n == 0) {
     serial_write('0');

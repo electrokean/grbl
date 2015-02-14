@@ -28,8 +28,7 @@
 #define settings_h
 
 
-#define GRBL_VERSION "0.9h 6-AXIS"
-#define GRBL_VERSION_BUILD "20150204"
+#include "grbl.h"
 
 // Version of the EEPROM data. Will be used to migrate existing data from older versions of Grbl
 // when firmware is upgraded. Always stored in byte 0 of eeprom
@@ -37,7 +36,7 @@
 
 // Define bit flag masks for the boolean settings in settings.flag.
 #define BITFLAG_REPORT_INCHES      bit(0)
-#define BITFLAG_AUTO_START         bit(1)
+// #define BITFLAG_AUTO_START         bit(1) // Obsolete. Don't alter to keep back compatibility.
 #define BITFLAG_INVERT_ST_ENABLE   bit(2)
 #define BITFLAG_HARD_LIMIT_ENABLE  bit(3)
 #define BITFLAG_HOMING_ENABLE      bit(4)

@@ -24,14 +24,7 @@
     Copyright (c) 2012 Sungeun K. Jeon
 */  
   
-#include "system.h"
-#include "settings.h"
-#include "protocol.h"
-#include "planner.h"
-#include "stepper.h"
-#include "motion_control.h"
-#include "limits.h"
-#include "report.h"
+#include "grbl.h"
 
 // Homing axis search distance multiplier. Computed by this value times the axis max travel.
 #define HOMING_AXIS_SEARCH_SCALAR  1.5 // Must be > 1 to ensure limit switch will be engaged.
@@ -167,14 +160,14 @@ void limits_go_home(uint8_t cycle_mask)
       // Set target location for active axes and setup computation for homing rate.
       if (bit_istrue(cycle_mask,bit(idx))) { 
         n_active_axis++;
-        if (!approach) {
-          // Set target direction based on cycle mask
-          if (bit_istrue(settings.homing_dir_mask,bit(idx))) { target[idx] += max_travel; }
-          else { target[idx] -= max_travel; }
-        } else { 
+        if (approach) {
           // Set target direction based on cycle mask
           if (bit_istrue(settings.homing_dir_mask,bit(idx))) { target[idx] -= max_travel; }
           else { target[idx] += max_travel; }
+        } else { 
+          // Set target direction based on cycle mask
+          if (bit_istrue(settings.homing_dir_mask,bit(idx))) { target[idx] += max_travel; }
+          else { target[idx] -= max_travel; }
         }
       }
 
@@ -208,7 +201,11 @@ void limits_go_home(uint8_t cycle_mask)
       st_prep_buffer(); // Check and prep segment buffer. NOTE: Should take no longer than 200us.
       // Check only for user reset. No time to run protocol_execute_realtime() in this loop.
 
-      if (sys.rt_exec_state & EXEC_RESET) { protocol_execute_realtime(); return; }
+      if (sys.rt_exec_state & (EXEC_SAFETY_DOOR | EXEC_RESET)) { // Abort homing and alarm upon safety door.
+        if (sys.rt_exec_state & EXEC_SAFETY_DOOR) { mc_reset(); }  
+        protocol_execute_realtime();
+        return;
+      }
     } while (STEP_MASK & axislock);
     
     st_reset(); // Immediately force kill steppers and reset step segment buffer.
@@ -291,7 +288,7 @@ void limits_go_home(uint8_t cycle_mask)
   
     // Initiate pull-off using main motion control routines. 
     // TODO : Clean up state routines so that this motion still shows homing state.
-    sys.state = STATE_QUEUED;
+    sys.state = STATE_IDLE;
     bit_true_atomic(sys.rt_exec_state, EXEC_CYCLE_START);
     protocol_execute_realtime();
     protocol_buffer_synchronize(); // Complete pull-off motion.
@@ -311,7 +308,6 @@ void limits_soft_check(float *target)
   for (idx=0; idx<N_AXIS; idx++) {
     // allow disabling soft limit per axis by setting max travel to zero
     if (settings.max_travel[idx]) {   
-   
     #ifdef HOMING_FORCE_SET_ORIGIN
       // When homing forced set origin is enabled, soft limits checks need to account for directionality.
       // NOTE: max_travel is stored as negative
@@ -335,7 +331,7 @@ void limits_soft_check(float *target)
         do {
           protocol_execute_realtime();
           if (sys.abort) { return; }
-        } while ( sys.state != STATE_IDLE || sys.state != STATE_QUEUED);
+        } while ( sys.state != STATE_IDLE );
       }
     
       mc_reset(); // Issue system reset and ensure spindle and coolant are shutdown.

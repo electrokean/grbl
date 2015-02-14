@@ -32,7 +32,6 @@
 
 #ifndef config_h
 #define config_h
-#include "system.h"
 
 
 // Default settings. Used when resetting EEPROM. Change to desired name in defaults.h
@@ -55,6 +54,7 @@
 #define CMD_FEED_HOLD '!'
 #define CMD_CYCLE_START '~'
 #define CMD_RESET 0x18 // ctrl-x.
+#define CMD_SAFETY_DOOR '@'
 
 // If homing is enabled, homing init lock sets Grbl into an alarm state upon power up. This forces
 // the user to perform the homing cycle (or override the locks) before doing anything else. This is
@@ -78,7 +78,7 @@
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
 #define HOMING_CYCLE_0 (1<<Z_AXIS)                // REQUIRED: First move Z to clear workspace.
 //#define HOMING_CYCLE_1 ((1<<X_AXIS)|(1<<Y_AXIS))  // OPTIONAL: Then move X,Y at the same time.
-// #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
+// #define HOMING_CYCLE_2                           // OPTIONAL: Uncomment and add axes mask to enable
 #define HOMING_CYCLE_1 (1<<Y_AXIS)                // OPTIONAL: Then move Y
 #define HOMING_CYCLE_2 (1<<X_AXIS)                // OPTIONAL: Finally move X
 //#define HOMING_CYCLE_1 (1<<B_AXIS)                // OPTIONAL: Then move B (head)
@@ -139,6 +139,18 @@
 // NOTE: The M8 flood coolant control pin on analog pin 4 will still be functional regardless.
 // #define ENABLE_M7 // Disabled by default. Uncomment to enable.
 
+// This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
+// immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
+// the safety door is re-engaged. When it is, Grbl will re-energize the machine and then resume on the
+// previous tool path, as if nothing happened.
+// #define ENABLE_SAFETY_DOOR_INPUT_PIN // Default disabled. Uncomment to enable.
+
+// After the safety door switch has been toggled and restored, this setting sets the power-up delay
+// between restoring the spindle and coolant and resuming the cycle.
+// NOTE: Delay value is defined in milliseconds from zero to 65,535. 
+#define SAFETY_DOOR_SPINDLE_DELAY 4000
+#define SAFETY_DOOR_COOLANT_DELAY 1000
+
 // Enable CoreXY kinematics. Use ONLY with CoreXY machines. 
 // IMPORTANT: If homing is enabled, you must reconfigure the homing cycle #defines above to 
 // #define HOMING_CYCLE_0 (1<<X_AXIS) and #define HOMING_CYCLE_1 (1<<Y_AXIS)
@@ -191,9 +203,10 @@
 // needs to connect a normal-open switch, but if inverted, this means the user should connect a 
 // normal-closed switch. 
 // The following options disable the internal pull-up resistors, sets the pins to a normal-low 
-// operation, and switches much be now connect to Vcc instead of ground. This also flips the meaning 
+// operation, and switches must be now connect to Vcc instead of ground. This also flips the meaning 
 // of the invert pin Grbl setting, where an inverted setting now means the user should connect a 
 // normal-open switch and vice versa.
+// NOTE: All pins associated with the feature are disabled, i.e. XYZ limit pins, not individual axes.
 // WARNING: When the pull-ups are disabled, this requires additional wiring with pull-down resistors!
 //#define DISABLE_LIMIT_PIN_PULL_UP
 //#define DISABLE_PROBE_PIN_PULL_UP
