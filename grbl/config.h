@@ -54,6 +54,7 @@
 #define CMD_FEED_HOLD '!'
 #define CMD_CYCLE_START '~'
 #define CMD_RESET 0x18 // ctrl-x.
+#define CMD_SAFETY_DOOR '@'
 
 // If homing is enabled, homing init lock sets Grbl into an alarm state upon power up. This forces
 // the user to perform the homing cycle (or override the locks) before doing anything else. This is
@@ -133,6 +134,18 @@
 // NOTE: The M8 flood coolant control pin on analog pin 4 will still be functional regardless.
 // #define ENABLE_M7 // Disabled by default. Uncomment to enable.
 
+// This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
+// immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
+// the safety door is re-engaged. When it is, Grbl will re-energize the machine and then resume on the
+// previous tool path, as if nothing happened.
+// #define ENABLE_SAFETY_DOOR_INPUT_PIN // Default disabled. Uncomment to enable.
+
+// After the safety door switch has been toggled and restored, this setting sets the power-up delay
+// between restoring the spindle and coolant and resuming the cycle.
+// NOTE: Delay value is defined in milliseconds from zero to 65,535. 
+#define SAFETY_DOOR_SPINDLE_DELAY 4000
+#define SAFETY_DOOR_COOLANT_DELAY 1000
+
 // Enable CoreXY kinematics. Use ONLY with CoreXY machines. 
 // IMPORTANT: If homing is enabled, you must reconfigure the homing cycle #defines above to 
 // #define HOMING_CYCLE_0 (1<<X_AXIS) and #define HOMING_CYCLE_1 (1<<Y_AXIS)
@@ -185,9 +198,10 @@
 // needs to connect a normal-open switch, but if inverted, this means the user should connect a 
 // normal-closed switch. 
 // The following options disable the internal pull-up resistors, sets the pins to a normal-low 
-// operation, and switches much be now connect to Vcc instead of ground. This also flips the meaning 
+// operation, and switches must be now connect to Vcc instead of ground. This also flips the meaning 
 // of the invert pin Grbl setting, where an inverted setting now means the user should connect a 
 // normal-open switch and vice versa.
+// NOTE: All pins associated with the feature are disabled, i.e. XYZ limit pins, not individual axes.
 // WARNING: When the pull-ups are disabled, this requires additional wiring with pull-down resistors!
 //#define DISABLE_LIMIT_PIN_PULL_UP
 //#define DISABLE_PROBE_PIN_PULL_UP
@@ -202,7 +216,7 @@
 // enable pin will output 5V for maximum RPM with 256 intermediate levels and 0V when disabled.
 // NOTE: IMPORTANT for Arduino Unos! When enabled, the Z-limit pin D11 and spindle enable pin D12 switch!
 // The hardware PWM output on pin D11 is required for variable spindle output voltages.
-// #define VARIABLE_SPINDLE // Default disabled. Uncomment to enable.
+#define VARIABLE_SPINDLE // Default disabled. Uncomment to enable.
 
 // Used by the variable spindle output only. These parameters set the maximum and minimum spindle speed
 // "S" g-code values to correspond to the maximum and minimum pin voltages. There are 256 discrete and 
